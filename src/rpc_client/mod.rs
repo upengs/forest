@@ -20,6 +20,7 @@ use crate::utils::net::global_http_client;
 use jsonrpc_v2::{Error, Id, RequestObject, V2};
 use once_cell::sync::Lazy;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+
 use tracing::debug;
 
 pub const API_INFO_KEY: &str = "FULLNODE_API_INFO";
@@ -146,16 +147,18 @@ where
 {
     let rpc_req = RequestObject::request()
         .with_method(method_name)
+        .with_id(1)
         .with_params(serde_json::to_value(params)?)
         .finish();
 
     let api_url = multiaddress_to_url(API_INFO.multiaddr.to_owned());
 
     debug!("Using JSON-RPC v2 HTTP URL: {}", api_url);
-
     let request = global_http_client().post(api_url).json(&rpc_req);
     let request = match (API_INFO.token.as_ref(), token) {
-        (Some(token), _) | (_, Some(token)) => request.header(http::header::AUTHORIZATION, token),
+        (Some(token), _) | (_, Some(token)) => {
+            request.header(http::header::AUTHORIZATION, format!("Bearer {}", token))
+        }
         _ => request,
     };
 
