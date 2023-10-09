@@ -26,3 +26,10 @@ pub async fn state_network_name(
 ) -> Result<StateNetworkNameResult, Error> {
     call(STATE_NETWORK_NAME, params, auth_token).await
 }
+
+pub async fn state_replay(
+    params: StateReplayParamsMe,
+    auth_token: &Option<String>,
+) -> Result<StateReplayResult, Error> {
+    call(STATE_REPLAY, params, auth_token).await
+}

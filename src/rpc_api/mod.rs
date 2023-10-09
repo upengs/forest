@@ -201,7 +201,7 @@ pub mod chain_api {
     pub type ChainGetBlockMessagesParams = (LotusJson<Cid>,);
     pub type ChainGetBlockMessagesResult = BlockMessages;
 
-    pub const CHAIN_GET_TIPSET_BY_HEIGHT: &str = "Filecoin.ChainGetTipsetByHeight";
+    pub const CHAIN_GET_TIPSET_BY_HEIGHT: &str = "Filecoin.ChainGetTipSetByHeight";
     pub type ChainGetTipsetByHeightParams = (ChainEpoch, TipsetKeys);
     pub type ChainGetTipsetByHeightResult = LotusJson<Tipset>;
 
@@ -218,10 +218,6 @@ pub mod chain_api {
     pub const CHAIN_GET_BLOCK: &str = "Filecoin.ChainGetBlock";
     pub type ChainGetBlockParams = (LotusJson<Cid>,);
     pub type ChainGetBlockResult = LotusJson<BlockHeader>;
-
-    // pub const CHAIN_GET_BLOCK_MESSAGES: &str = "Filecoin.ChainGetBlockMessages";
-    // pub type ChainGetBlockMessagesParams = (LotusJson<Cid>,);
-    // pub type ChainGetBlockMessagesResult = LotusJson<BlockMessages>;
 
     pub const CHAIN_GET_TIPSET: &str = "Filecoin.ChainGetTipSet";
     pub type ChainGetTipSetParams = (LotusJson<TipsetKeys>,);
@@ -351,6 +347,7 @@ pub mod state_api {
 
     pub const STATE_REPLAY: &str = "Filecoin.StateReplay";
     pub type StateReplayParams = (LotusJson<Cid>, LotusJson<TipsetKeys>);
+    pub type StateReplayParamsMe = (LotusJson<TipsetKeys>, LotusJson<Cid>);
     pub type StateReplayResult = InvocResult;
 
     pub const STATE_NETWORK_NAME: &str = "Filecoin.StateNetworkName";

@@ -169,7 +169,7 @@ impl TipsetStateCache {
 }
 
 /// Type to represent invocation of state call results.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct InvocResult {
     #[serde(with = "crate::lotus_json")]

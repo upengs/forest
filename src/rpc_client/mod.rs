@@ -145,10 +145,12 @@ where
     P: Serialize,
     R: DeserializeOwned,
 {
+    let p = serde_json::to_value(params)?;
+    eprintln!("{:?}", p.to_string());
     let rpc_req = RequestObject::request()
         .with_method(method_name)
         .with_id(1)
-        .with_params(serde_json::to_value(params)?)
+        .with_params(p)
         .finish();
 
     let api_url = multiaddress_to_url(API_INFO.multiaddr.to_owned());

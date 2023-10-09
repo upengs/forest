@@ -4,20 +4,19 @@
 use crate::blocks::{Tipset, TipsetKeys};
 use crate::lotus_json::LotusJson;
 use crate::rpc_client::chain_ops::*;
+use crate::rpc_client::state_ops::*;
 use anyhow::bail;
 use cid::Cid;
 use clap::Subcommand;
-
 use fil_actor_interface::market::Method as MarketMethod;
 use fil_actor_interface::miner::Method as MinerMethod;
 use fil_actor_market_state::v11::PublishStorageDealsParams;
 use fil_actor_miner_state::v10::{PreCommitSectorBatchParams, ProveReplicaUpdatesParams};
 use fil_actor_miner_state::v11::{PreCommitSectorParams, ProveCommitSectorParams};
 
-use futures::TryFutureExt;
-use fvm_shared4::MethodNum;
-
 use super::*;
+use crate::shim::clock::ChainEpoch;
+use futures::TryFutureExt;
 
 #[derive(Debug, Subcommand)]
 pub enum ChainCommands {
@@ -25,6 +24,11 @@ pub enum ChainCommands {
     Block {
         #[arg(short)]
         cid: Cid,
+    },
+
+    BlockHeight {
+        #[arg(short)]
+        epoch: ChainEpoch,
     },
 
     BlockMessages {
@@ -77,6 +81,50 @@ impl ChainCommands {
             Self::BlockMessages { cid } => print_rpc_res_pretty(
                 chain_get_block_message((cid.into(),), &config.client.rpc_token).await,
             ),
+            Self::BlockHeight { epoch } => {
+                let tipset = chain_get_tipset_by_height(
+                    (epoch, TipsetKeys::default()),
+                    &config.client.rpc_token,
+                )
+                .await
+                .map_err(handle_rpc_err)
+                .unwrap()
+                .0;
+
+                let tipsets = tipset.key();
+                for cid in tipset.cids().iter().take(1) {
+                    let bh =
+                        chain_get_block_message((cid.clone().into(),), &config.client.rpc_token)
+                            .await
+                            .map_err(handle_rpc_err)
+                            .unwrap();
+
+                    for msg in bh.bls_msg.iter().take(1) {
+                        let x = state_replay(
+                            (tipsets.clone().into(), msg.cid().unwrap().into()),
+                            &config.client.rpc_token,
+                        )
+                        .await
+                        .map_err(handle_rpc_err)
+                        .unwrap();
+
+                        eprintln!("bls: {:?}", x);
+                    }
+                    for msg in bh.secp_msg.iter().take(1) {
+                        let x = state_replay(
+                            (tipsets.clone().into(), msg.cid().unwrap().into()),
+                            &config.client.rpc_token,
+                        )
+                        .await
+                        .map_err(handle_rpc_err)
+                        .unwrap();
+
+                        eprintln!("secps: {:?}", x);
+                    }
+                }
+
+                Ok(())
+            }
             Self::Genesis => {
                 print_rpc_res_pretty(chain_get_genesis(&config.client.rpc_token).await)
             }
@@ -86,6 +134,15 @@ impl ChainCommands {
 
                 match msg {
                     Ok(LotusJson(msg)) => {
+                        let x = state_replay(
+                            (LotusJson(TipsetKeys::default()), LotusJson(msg.cid()?)),
+                            &config.client.rpc_token,
+                        )
+                        .await
+                        .map_err(handle_rpc_err)?;
+
+                        eprintln!("{:?}", x);
+
                         if msg.method_num == (MinerMethod::ProveCommitSector as u64) {
                             let p = msg.params.deserialize::<ProveCommitSectorParams>()?;
                             eprintln!("{}", p.sector_number);
