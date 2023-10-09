@@ -21,6 +21,11 @@ pub enum ChainCommands {
         cid: Cid,
     },
 
+    BlockMessages {
+        #[arg(short)]
+        cid: Cid,
+    },
+
     /// Prints out the genesis tipset
     Genesis,
 
@@ -63,6 +68,9 @@ impl ChainCommands {
             Self::Block { cid } => {
                 print_rpc_res_pretty(chain_get_block((cid.into(),), &config.client.rpc_token).await)
             }
+            Self::BlockMessages { cid } => print_rpc_res_pretty(
+                chain_get_block_message((cid.into(),), &config.client.rpc_token).await,
+            ),
             Self::Genesis => {
                 print_rpc_res_pretty(chain_get_genesis(&config.client.rpc_token).await)
             }

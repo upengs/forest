@@ -219,6 +219,10 @@ pub mod chain_api {
     pub type ChainGetBlockParams = (LotusJson<Cid>,);
     pub type ChainGetBlockResult = LotusJson<BlockHeader>;
 
+    // pub const CHAIN_GET_BLOCK_MESSAGES: &str = "Filecoin.ChainGetBlockMessages";
+    // pub type ChainGetBlockMessagesParams = (LotusJson<Cid>,);
+    // pub type ChainGetBlockMessagesResult = LotusJson<BlockMessages>;
+
     pub const CHAIN_GET_TIPSET: &str = "Filecoin.ChainGetTipSet";
     pub type ChainGetTipSetParams = (LotusJson<TipsetKeys>,);
     pub type ChainGetTipSetResult = LotusJson<Tipset>;

@@ -13,6 +13,13 @@ pub async fn chain_get_block(
     call(CHAIN_GET_BLOCK, cid, auth_token).await
 }
 
+pub async fn chain_get_block_message(
+    cid: ChainGetBlockMessagesParams,
+    auth_token: &Option<String>,
+) -> Result<ChainGetBlockMessagesResult, Error> {
+    call(CHAIN_GET_BLOCK_MESSAGES, cid, auth_token).await
+}
+
 pub async fn chain_export(
     params: ChainExportParams,
     auth_token: &Option<String>,
