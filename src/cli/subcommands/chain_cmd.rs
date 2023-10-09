@@ -7,9 +7,15 @@ use crate::rpc_client::chain_ops::*;
 use anyhow::bail;
 use cid::Cid;
 use clap::Subcommand;
-use fil_actor_miner_state::v11::ProveCommitSectorParams;
+
+use fil_actor_interface::market::Method as MarketMethod;
+use fil_actor_interface::miner::Method as MinerMethod;
+use fil_actor_market_state::v11::PublishStorageDealsParams;
+use fil_actor_miner_state::v10::{PreCommitSectorBatchParams, ProveReplicaUpdatesParams};
+use fil_actor_miner_state::v11::{PreCommitSectorParams, ProveCommitSectorParams};
 
 use futures::TryFutureExt;
+use fvm_shared4::MethodNum;
 
 use super::*;
 
@@ -80,9 +86,24 @@ impl ChainCommands {
 
                 match msg {
                     Ok(LotusJson(msg)) => {
-                        if msg.method_num == 7 {
+                        if msg.method_num == (MinerMethod::ProveCommitSector as u64) {
                             let p = msg.params.deserialize::<ProveCommitSectorParams>()?;
                             eprintln!("{}", p.sector_number);
+                        } else if msg.method_num == (MinerMethod::PreCommitSector as u64) {
+                            let p = msg.params.deserialize::<PreCommitSectorParams>()?;
+                            eprintln!("{}", p.sector_number);
+                        } else if msg.method_num == (MinerMethod::PreCommitSectorBatch as u64) {
+                            let p = msg.params.deserialize::<PreCommitSectorBatchParams>()?;
+                            eprintln!("{:?}", p);
+                        } else if msg.method_num == (MinerMethod::ProveCommitAggregate as u64) {
+                            let p = msg.params.deserialize::<ProveCommitSectorParams>()?;
+                            eprintln!("{:?}", p.sector_number);
+                        } else if msg.method_num == (MarketMethod::PublishStorageDeals as u64) {
+                            let p = msg.params.deserialize::<PublishStorageDealsParams>()?;
+                            eprintln!("{:?}", p);
+                        } else if msg.method_num == (MinerMethod::ProveReplicaUpdates as u64) {
+                            let p = msg.params.deserialize::<ProveReplicaUpdatesParams>()?;
+                            eprintln!("{:?}", p);
                         }
                     }
                     _ => {}
